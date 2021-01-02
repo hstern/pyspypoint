@@ -1,3 +1,4 @@
 .eggs/
 dist/
 pyspypoint.egg-info/
+*.pyc
