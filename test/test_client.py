@@ -144,13 +144,19 @@ class TestClient(unittest.TestCase):
 class TestCamera(unittest.TestCase):
     tdata = json.loads('''
         {
-          "id": "elided01"
+          "id": "elided01",
+          "status": "test_status",
+          "config": {
+            "name": "test_camera"
+          }
         }
     ''')
 
     def test_camera(self):
         camera = c.Camera(**self.tdata)
         self.assertEqual(self.tdata['id'], camera.id)
+        self.assertEqual(self.tdata['status'], camera.status)
+        self.assertEqual(self.tdata['config']['name'], camera.config.name)
 
 
 class TestPhoto(unittest.TestCase):
@@ -219,4 +225,5 @@ class TestPhoto(unittest.TestCase):
 
     def _test_url(self, size):
         p = c.Photo(**self.tdata)
+        self.assertEqual(self.tdata['small']['headers'][0]['name'], p.small.headers[0].name)
         self.assertEqual(f'https://s3.amazonaws.com/{self.tdata[size]["path"]}', p.url(size))

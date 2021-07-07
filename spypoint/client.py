@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Collection, Dict
+from typing import Collection, Dict, List
 
 import requests
 
@@ -25,29 +25,42 @@ PHOTO_URL = f'{API_BASE}/api/v3/photo/all'
 FILTERS_URL = f'{API_BASE}/api/v3/photo/filters'
 
 
-class Camera:
-    def __init__(self, id, **kwargs):  # noqa
-        for k, v in kwargs.items():
+class _AttrDict:
+    def __init__(self, d):  # noqa
+        for k, v in d.items():
+            if isinstance(v, Dict):
+                v = _AttrDict(v)
+            elif isinstance(v, List):
+                v_new = list()
+                for v_sub in v:
+                    if isinstance(v_sub, dict):
+                        v_new.append(_AttrDict(v_sub))
+                    else:
+                        v_new.append(v_sub)
+                v = tuple(v_new)
             if k and k[0] != '_':
                 setattr(self, k, v)
+
+
+class Camera(_AttrDict):
+    def __init__(self, id, **kwargs):  # noqa
+        super(Camera, self).__init__(kwargs)
         self.id = id
 
     def __repr__(self):
         return f'Camera({self.id})'
 
 
-class Photo:
+class Photo(_AttrDict):
     def __init__(self, **kwargs):
-        for k, v in kwargs.items():
-            if k and k[0] != '_':
-                setattr(self, k, v)
+        super(Photo, self).__init__(kwargs)
 
     def __repr__(self):
         return f'Photo({self.id})'  # noqa
 
     def url(self, size='large'):
-        section = getattr(self, size)
-        return f'https://{section.get("host")}/{section.get("path")}'
+        section = getattr(self, size, dict())
+        return f'https://{getattr(section, "host")}/{getattr(section, "path")}'
 
 
 class Client:
