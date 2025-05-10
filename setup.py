@@ -15,4 +15,5 @@
 import setuptools
 setuptools.setup(
     use_scm_version=True,
+    package_data={"pyspypoint": ["py.typed"]},
 )
